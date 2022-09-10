@@ -42,7 +42,8 @@ function! I18nDisplayTranslation()
     let selected_text = s:removeQuotes(s:strip(@a))
     let json_path = s:askForJsonPath()
     let cmd = s:install_path . "/lookup_json_key '" . json_path . "' '" . selected_text . "' "
-    echom system(cmd)
+    " echom is for short messages, but this is not always the case here
+    echo "\n '" . selected_text . "' => " . system(cmd)
   endif
 endfunction
 
