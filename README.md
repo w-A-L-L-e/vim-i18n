@@ -1,12 +1,24 @@
 # vim-i18n
 
-Automated translation of Ruby/Rails projects
+Automated translation of Ruby/Rails projects extended to also work in Vue.js frontend source files
 
-Modified by Walter Schreppers to handle translations in .vue templates.
+Modified by Walter Schreppers to also work for translations in .vue javascript templates.
+
 It now also saves to /src/locales/nl.json or en.json and makes a snippit compatible
 with vue-i18n whenever the filename is .js or .vue.
-Instead of the ruby t('key') it now does {{ $t('key') }} in the view code and $t('key') in js files.
-After this it is inserted into the .json file you supply when first calling I18nTranslateString.
+
+Instead of the ruby version
+```
+<%= t('key') %>
+```
+it now inserts: 
+```
+{{ $t('key') }} 
+```
+in the vue application view code and $t('key') in js files.
+
+After this, the original string is inserted into the locales/nl.json file or the path
+you supply when first calling I18nTranslateString.
 
 
 ## Introduction
