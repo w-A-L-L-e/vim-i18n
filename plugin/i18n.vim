@@ -35,38 +35,25 @@ endfunction
 
 function! I18nDisplayTranslation()
   normal gv"ay
-  " ruby get_translation(Vim.evaluate('@a'), Vim.evaluate('s:askForYamlPath()'))
+  if &filetype == 'eruby' || &filetype == 'eruby.html' || &filetype == 'slim' || &filetype == 'haml'
+    echom "Todo fix external ruby lookup script"
+    " ruby get_translation(Vim.evaluate('@a'), Vim.evaluate('s:askForYamlPath()'))
+  elseif &filetype == 'js' || &filetype == 'vue' 
+    let selected_text = s:removeQuotes(s:strip(@a))
+    let json_path = s:askForJsonPath()
+    let cmd = s:install_path . "/lookup_json_key '" . json_path . "' '" . selected_text . "' "
+    echom system(cmd)
+  endif
 endfunction
 
-" ruby << EOF
-" require 'yaml'
-" 
-" def get_translation(translation_key, file_name)
-"   locale = file_name.match(/(?<locale>\w+[-_]?\w+)\.yml$/)[:locale]
-"   translations_hash = load_yaml(file_name)
-"   translation = get_deep_value_for(translations_hash, "#{locale}.#{translation_key}")
-"   print translation || "Sorry, there's no translation for the key: '#{translation_key}', with locale: '#{locale}'"
-" end
-" 
-" def load_yaml(file_name)
-"   begin
-"     YAML.load(File.open(file_name))
-"   rescue
-"     raise "There's a problem with parsing translations from the file: #{file_name}"
-"   end
-" end
-" 
-" def get_deep_value_for(hash, key)
-"   return if hash.nil?
-"   keys = key.split('.')
-"   first_segment_of_key = keys.delete_at(0)
-"   segment_tail_of_key = keys.join('.')
-"   value = hash[first_segment_of_key]
-" 
-"   return value if segment_tail_of_key.empty?
-"   get_deep_value_for(value, segment_tail_of_key)
-" end
-" EOF
+
+function! s:addStringToLocaleJson(text,key)
+  let json_path = s:askForJsonPath()
+  let escaped_text = shellescape(a:text)
+  let cmd = s:install_path . "/add_json_key '" . json_path . "' '" . a:key . "' " . escaped_text
+  call system(cmd)
+endfunction
+
 
 function! s:removeQuotes(text)
   let text = substitute(a:text, "^[\\\"']", "", "")

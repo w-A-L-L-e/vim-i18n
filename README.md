@@ -107,6 +107,12 @@ Add this line or a simliar one to your `~.vimrc`:
 vmap <Leader>z :call I18nTranslateString()<CR>
 vmap <Leader>dt :call I18nDisplayTranslation()<CR>
 ```
+
+For me however the above didn't seem to work. I used this as mapping:
+```
+vmap <C-S> :call I18nTranslateString()<CR>
+vmap <C-Y> :call I18nDisplayTranslation()<CR>
+```
 ## Installation
 
 Install via [pathogen.vim](https://github.com/tpope/vim-pathogen), simply copy and paste:

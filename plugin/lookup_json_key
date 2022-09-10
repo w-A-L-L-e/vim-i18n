@@ -1,0 +1,27 @@
+#!/usr/bin/env python
+# author: Walter Schreppers
+import sys
+import json
+import os.path
+
+def lookup(filename, key):
+    data = {}
+    if os.path.isfile(filename):
+        f = open(filename)
+        data = json.load(f)
+        f.close()
+    else:
+        return "Translation file {filename} not found"
+
+    if data.get(key):
+        return data.get(key)
+    else:
+        return f"Key {key} not found in file {filename}"
+
+if __name__ == '__main__':
+    if len(sys.argv) < 3:
+        print(f"USAGE: {sys.argv[0]} <json_file> <key>")
+    else:
+        json_file = sys.argv[1]
+        key = sys.argv[2]
+        print(lookup(json_file, key))
