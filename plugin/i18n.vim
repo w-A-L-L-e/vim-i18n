@@ -19,6 +19,12 @@ function! I18nTranslateString()
       let @x = s:generateI18nCall(key, variables, "<%= t('", "') %>")
     endif
     call s:addStringToYamlStore(text, fullKey)
+  elseif &filetype == 'vue'
+    let @x = s:generateI18nCall(key, variables, "{{ $t('", "') }}")
+    call s:addStringToLocaleJson(text, key)
+  elseif &filetype == 'js'
+    let @x = s:generateI18nCall(key, variables, "$t('", "')")
+    call s:addStringToLocaleJson(text, key)
   else
     let @x = s:generateI18nCall(key, variables, "t('", "')")
     call s:addStringToYamlStore(text, key)
@@ -29,38 +35,38 @@ endfunction
 
 function! I18nDisplayTranslation()
   normal gv"ay
-  ruby get_translation(Vim.evaluate('@a'), Vim.evaluate('s:askForYamlPath()'))
+  " ruby get_translation(Vim.evaluate('@a'), Vim.evaluate('s:askForYamlPath()'))
 endfunction
 
-ruby << EOF
-require 'yaml'
-
-def get_translation(translation_key, file_name)
-  locale = file_name.match(/(?<locale>\w+[-_]?\w+)\.yml$/)[:locale]
-  translations_hash = load_yaml(file_name)
-  translation = get_deep_value_for(translations_hash, "#{locale}.#{translation_key}")
-  print translation || "Sorry, there's no translation for the key: '#{translation_key}', with locale: '#{locale}'"
-end
-
-def load_yaml(file_name)
-  begin
-    YAML.load(File.open(file_name))
-  rescue
-    raise "There's a problem with parsing translations from the file: #{file_name}"
-  end
-end
-
-def get_deep_value_for(hash, key)
-  return if hash.nil?
-  keys = key.split('.')
-  first_segment_of_key = keys.delete_at(0)
-  segment_tail_of_key = keys.join('.')
-  value = hash[first_segment_of_key]
-
-  return value if segment_tail_of_key.empty?
-  get_deep_value_for(value, segment_tail_of_key)
-end
-EOF
+" ruby << EOF
+" require 'yaml'
+" 
+" def get_translation(translation_key, file_name)
+"   locale = file_name.match(/(?<locale>\w+[-_]?\w+)\.yml$/)[:locale]
+"   translations_hash = load_yaml(file_name)
+"   translation = get_deep_value_for(translations_hash, "#{locale}.#{translation_key}")
+"   print translation || "Sorry, there's no translation for the key: '#{translation_key}', with locale: '#{locale}'"
+" end
+" 
+" def load_yaml(file_name)
+"   begin
+"     YAML.load(File.open(file_name))
+"   rescue
+"     raise "There's a problem with parsing translations from the file: #{file_name}"
+"   end
+" end
+" 
+" def get_deep_value_for(hash, key)
+"   return if hash.nil?
+"   keys = key.split('.')
+"   first_segment_of_key = keys.delete_at(0)
+"   segment_tail_of_key = keys.join('.')
+"   value = hash[first_segment_of_key]
+" 
+"   return value if segment_tail_of_key.empty?
+"   get_deep_value_for(value, segment_tail_of_key)
+" end
+" EOF
 
 function! s:removeQuotes(text)
   let text = substitute(a:text, "^[\\\"']", "", "")
@@ -125,6 +131,13 @@ function! s:addStringToYamlStore(text, key)
   call system(cmd)
 endfunction
 
+function! s:addStringToLocaleJson(text,key)
+  let json_path = s:askForJsonPath()
+  let escaped_text = shellescape(a:text)
+  let cmd = s:install_path . "/add_json_key '" . json_path . "' '" . a:key . "' " . escaped_text
+  call system(cmd)
+endfunction
+
 function! s:askForYamlPath()
   call inputsave()
   let path = ""
@@ -133,6 +146,19 @@ function! s:askForYamlPath()
   else
     let path = input('YAML store: ', 'config/locales/en.yml', 'file')
     let g:I18nYamlPath = path
+  endif
+  call inputrestore()
+  return path
+endfunction
+
+function! s:askForJsonPath()
+  call inputsave()
+  let path = ""
+  if exists('g:I18nJsonPath')
+    let path = g:I18nJsonPath
+  else
+    let path = input('JSON store: ', 'src/locales/nl.json', 'file')
+    let g:I18nJsonPath = path
   endif
   call inputrestore()
   return path
