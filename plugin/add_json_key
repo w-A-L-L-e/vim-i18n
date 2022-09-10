@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# author: Walter Schreppers
 import sys
 import json
 import os.path
